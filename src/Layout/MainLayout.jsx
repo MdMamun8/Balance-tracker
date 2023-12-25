@@ -1,12 +1,15 @@
+import Loading from "../Component/Loading/Loading";
 import Footer from "./Footer/Footer";
 import Header from "./Header/Header";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigation } from "react-router-dom";
 
 const MainLayout = () => {
+  const navigate = useNavigation();
   return (
     <div>
       <Header />
-      <Outlet />
+      {navigate.state === "loading" ? <Loading /> : <Outlet />}
+
       <Footer />
     </div>
   );
