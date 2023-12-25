@@ -1,15 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc";
-import { FaGithubSquare } from "react-icons/fa";
-import { FaSquareFacebook } from "react-icons/fa6";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendEmailVerification,
   updateProfile,
 } from "firebase/auth";
 import auth from "../../Firebase/Firebase.config";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
+import SocialLogin from "../SocialLogin/SocialLogin";
 const Registration = () => {
   const [currUser, setCurrUser] = useState({});
   const navigate = useNavigate();
@@ -26,7 +25,29 @@ const Registration = () => {
     const email = e.target.email.value;
     const password = e.target.password.value;
     const confirmPassword = e.target.confirmPassword.value;
-    console.log(name, email, password, confirmPassword);
+
+    if (
+      name === "" ||
+      email === "" ||
+      password === "" ||
+      confirmPassword === ""
+    ) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "please fill the form",
+      });
+      return;
+    }
+
+    if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/.test(password)) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Password must be at least 8 characters, one uppercase letter, one lowercase letter, and one number",
+      });
+      return;
+    }
 
     if (password !== confirmPassword) {
       Swal.fire({
@@ -37,14 +58,21 @@ const Registration = () => {
       });
       return;
     }
-
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
         updateProfile(auth.currentUser, {
           displayName: name,
-        });
-        console.log(user);
+        })
+          .then(() => {
+            sendEmailVerification(auth.currentUser).then((res) => {
+              console.log(userCredential);
+              navigate("/");
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       })
       .catch((err) => {
         console.log(err.message);
@@ -130,19 +158,7 @@ const Registration = () => {
             <h1>or</h1>
             <h2 className=' uppercase text-2xl'>login with</h2>
           </div>
-          <div className='bg-black'></div>
-
-          <div className='grid grid-flow-col justify-center gap-5'>
-            <button>
-              <FcGoogle size={40} />
-            </button>
-            <button>
-              <FaGithubSquare size={40} />
-            </button>
-            <button>
-              <FaSquareFacebook size={40} color='blue' />
-            </button>
-          </div>
+          <SocialLogin />
         </div>
       </div>
     </div>
