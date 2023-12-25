@@ -6,7 +6,8 @@ import { signOut } from "firebase/auth";
 const Header = () => {
   const [user] = useAuthState(auth);
   const logout = () => {
-    signOut(auth);
+    signOut(auth)
+    .then(())
   };
   return (
     <div className='flex flex-1 gap-20 items-center bg-slate-500 w-[68.2rem]'>
